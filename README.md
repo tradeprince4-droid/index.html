@@ -1,182 +1,373 @@
-# index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEURAL JOURNAL</title>
+<title>NeonTrack | Expense Dashboard</title>
 <style>
-*{box-sizing:border-box}
-body{
-  margin:0;background:#080c10;color:#00ff9c;
-  font-family:monospace;padding:20px;
+:root {
+  --bg: #050816;
+  --panel: #0b1330;
+  --border: #1b2b59;
+  --blue: #19baff;
+  --purple: #9b5cff;
+  --text: #f0f5ff;
+  --muted: #92a5d4;
 }
-main{max-width:750px;margin:auto}
-h1{letter-spacing:4px;text-shadow:0 0 12px #00ff9c}
-.panel{
-  border:1px solid #00ff9c;padding:18px;
-  margin:18px 0;background:#0c1318;
-  box-shadow:0 0 12px #00ff9c15;
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at top right,#151044,var(--bg) 55%);
+  color: var(--text);
+  font-family: Inter,system-ui,Arial,sans-serif;
 }
-input,textarea,select{
-  width:100%;padding:12px;margin:8px 0;
-  background:#080c10;color:#00ff9c;
-  border:1px solid #245b49;font:inherit;
+.app { display: flex; min-height: 100vh; }
+aside {
+  width: 225px;
+  padding: 28px 18px;
+  border-right: 1px solid var(--border);
+  background: #080d22;
 }
-textarea{min-height:130px;resize:vertical}
-button{
-  background:#00ff9c;color:#080c10;
-  padding:12px 16px;border:0;
-  font-weight:bold;cursor:pointer;margin:5px 3px 5px 0;
+.logo { font-size: 24px; font-weight: 800; }
+.logo span { color: var(--blue); }
+.sub { color: var(--muted); font-size: 12px; margin: 5px 0 35px; }
+nav button {
+  display: block; width: 100%; text-align: left;
+  margin: 8px 0; padding: 13px;
+  background: transparent; color: #b9c9f3;
+  border: 1px solid transparent; border-radius: 12px;
+  cursor: pointer; font-size: 14px;
 }
-.entry{border-bottom:1px solid #245b49;padding:12px 0}
-small{color:#7eab9b}
-.muted{color:#7eab9b}
+nav button:hover,nav button.active {
+  color: white; background: #132354;
+  border-color: #2864ff; box-shadow: 0 0 18px #1353ff28;
+}
+main { flex: 1; min-width: 0; padding: 30px; }
+header { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:25px; }
+h1 { margin:0; font-size: clamp(23px,3vw,32px); }
+p { color:var(--muted); }
+header p { margin:8px 0 0; }
+.date { color:#b5c7ef; font-size:13px; }
+.cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.card,.panel {
+  background:linear-gradient(140deg,#101a3c,#080f25);
+  border:1px solid var(--border); border-radius:17px;
+  padding:21px; box-shadow:0 10px 35px #0002;
+}
+.card { transition:.25s; }
+.card:hover { transform:translateY(-4px); border-color:var(--blue); }
+.card.blue { border-color:#126bc2; }
+.card.purple { border-color:#7940cb; }
+.card.green { border-color:#087e81; }
+.card-label { color:#a9bbe8; font-size:13px; }
+.amount { font-size:clamp(20px,2.5vw,29px); font-weight:750; margin:12px 0; overflow-wrap:anywhere; }
+.change { color:#28e6b2; font-size:12px; }
+.content { display:grid; grid-template-columns:1.1fr 1fr; gap:17px; margin-top:18px; }
+h2 { font-size:17px; margin:0 0 22px; }
+.chart-area { display:flex; align-items:center; justify-content:center; gap:24px; flex-wrap:wrap; }
+.donut {
+  width:160px; height:160px; border-radius:50%;
+  background:conic-gradient(#c84cf7 0 35%,#1e9dff 35% 60%,#28dfae 60% 75%,#ffc845 75% 90%,#7855ff 90%);
+  display:grid; place-items:center; flex-shrink:0;
+  box-shadow:0 0 28px #865aff22;
+}
+.donut-inner {
+  width:105px; height:105px; border-radius:50%;
+  background:#0b1330; display:grid; place-content:center; text-align:center;
+}
+.donut-inner strong { font-size:19px; }
+.donut-inner small { color:var(--muted); margin-top:5px; }
+.legend { display:grid; gap:14px; font-size:12px; min-width:125px; }
+.legend div { display:flex; gap:8px; align-items:center; justify-content:space-between; }
+.dot { width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:4px; }
+.transactions { display:grid; gap:0; }
+.transaction {
+  display:flex; justify-content:space-between; gap:12px;
+  padding:15px 0; border-bottom:1px solid #1b2b50;
+}
+.transaction:last-child { border-bottom:0; }
+.tx-name { font-size:13px; font-weight:650; }
+.tx-detail { font-size:11px; color:var(--muted); margin-top:5px; }
+.tx-right { text-align:right; font-size:13px; }
+.tx-right strong { color:#39e8c1; }
+.view { display:none; }
+.view.active { display:block; }
+.action {
+  background:linear-gradient(100deg,#148eff,#873cff);
+  border:0; border-radius:10px; padding:12px 18px;
+  color:white; font-weight:700; cursor:pointer;
+}
+.action:hover { filter:brightness(1.15); }
+input,select {
+  width:100%; padding:13px; margin:8px 0 17px;
+  border:1px solid #263c72; background:#080f25;
+  color:white; border-radius:9px; outline:none;
+}
+input:focus,select:focus { border-color:var(--blue); }
+label { color:#b8c8eb; font-size:13px; }
+.form-panel { max-width:540px; }
+.search { max-width:350px; }
+footer { color:#8296c7; text-align:center; font-size:12px; padding:25px 5px 5px; }
+@media(max-width:850px) {
+  aside { width:175px; padding:20px 10px; }
+  main { padding:20px 14px; }
+  .cards { grid-template-columns:1fr; }
+  .content { grid-template-columns:1fr; }
+}
+@media(max-width:520px) {
+  .app { display:block; }
+  aside { width:100%; padding:16px; border-right:0; border-bottom:1px solid var(--border); }
+  .sub { margin-bottom:12px; }
+  nav { display:flex; gap:5px; overflow-x:auto; }
+  nav button { width:auto; white-space:nowrap; margin:0; padding:10px; }
+  main { padding:20px 13px; }
+  header { align-items:flex-start; }
+  .date { font-size:11px; text-align:right; }
+  .chart-area { gap:20px; }
+  .donut { width:140px; height:140px; }
+  .donut-inner { width:92px; height:92px; }
+}
 </style>
 </head>
 <body>
-<main>
-<h1>NEURAL JOURNAL</h1>
-<p class="muted">PERSONAL LOG SYSTEM // V1.0</p>
+<div class="app">
+  <aside>
+    <div class="logo">◈ Neon<span>Track</span></div>
+    <div class="sub">PERSONAL FINANCE SYSTEM</div>
+    <nav>
+      <button class="active" data-view="dashboard">⌂ &nbsp; Dashboard</button>
+      <button data-view="add">＋ &nbsp; Add Expense</button>
+      <button data-view="history">☷ &nbsp; View Expenses</button>
+      <button data-view="summary">◉ &nbsp; Summary</button>
+    </nav>
+    <p style="margin-top:45px;font-size:12px">✦ Small steps,<br> &nbsp;&nbsp; bigger goals.</p>
+  </aside>
 
-<div class="panel">
-  <small>SYSTEM TIME</small>
-  <h2 id="clock">--:--:--</h2>
-  <small id="date"></small>
-</div>
+  <main>
+    <header>
+      <div>
+        <h1 id="heading">Welcome Back!</h1>
+        <p id="subtitle">Track your expenses. Build a better tomorrow.</p>
+      </div>
+      <div class="date" id="today"></div>
+    </header>
 
-<div class="panel">
-  <h3>+ NEW ENTRY</h3>
-  <input id="title" placeholder="Entry title">
-  <select id="mood">
-    <option>Focused</option>
-    <option>Happy</option>
-    <option>Motivated</option>
-    <option>Tired</option>
-    <option>Reflective</option>
-  </select>
-  <textarea id="content" placeholder="What did you learn today?"></textarea>
-  <button onclick="saveEntry()">SAVE ENTRY</button>
-  <p id="status" class="muted"></p>
-</div>
+    <section class="view active" id="dashboard">
+      <div class="cards">
+        <div class="card blue">
+          <div class="card-label">◉ &nbsp; Total Expenses</div>
+          <div class="amount" id="total">₹ 4,850.00</div>
+          <div class="change">↗ Stay in control</div>
+        </div>
+        <div class="card purple">
+          <div class="card-label">▦ &nbsp; This Month</div>
+          <div class="amount" id="monthly">₹ 4,850.00</div>
+          <div class="change">↗ Your financial overview</div>
+        </div>
+        <div class="card green">
+          <div class="card-label">☷ &nbsp; Transactions</div>
+          <div class="amount" id="count">5</div>
+          <div class="change">✓ Records tracked</div>
+        </div>
+      </div>
 
-<div class="panel">
-  <h3>ARCHIVE DATABASE</h3>
-  <input id="search" placeholder="Search entries..."
-         oninput="renderEntries()">
-  <p id="count">0 ENTRIES</p>
-  <div id="entries"></div>
-  <button onclick="exportData()">EXPORT BACKUP</button>
+      <div class="content">
+        <div class="panel">
+          <h2>Spending by Category</h2>
+          <div class="chart-area">
+            <div class="donut" id="donut">
+              <div class="donut-inner">
+                <strong id="chartTotal">₹4,850</strong>
+                <small>Total spent</small>
+              </div>
+            </div>
+            <div class="legend" id="legend"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Recent Expenses</h2>
+          <div id="recent" class="transactions"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="add">
+      <div class="panel form-panel">
+        <h2>＋ Add New Expense</h2>
+        <form id="expenseForm">
+          <label>Expense Name</label>
+          <input id="name" placeholder="e.g. Coffee" required>
+          <label>Category</label>
+          <select id="category">
+            <option>Food</option><option>Transport</option>
+            <option>Shopping</option><option>Bills</option>
+            <option>Education</option><option>Other</option>
+          </select>
+          <label>Amount (₹)</label>
+          <input id="amountInput" type="number" min="0.01" step="0.01" placeholder="e.g. 250" required>
+          <label>Date</label>
+          <input id="dateInput" type="date" required>
+          <button class="action" type="submit">▣ &nbsp; Save Expense</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="view" id="history">
+      <div class="panel">
+        <h2>Expense History</h2>
+        <input class="search" id="search" placeholder="⌕ Search expenses...">
+        <div id="allExpenses" class="transactions"></div>
+      </div>
+    </section>
+
+    <section class="view" id="summary">
+      <div class="panel">
+        <h2>Your Financial Summary</h2>
+        <div class="cards">
+          <div><div class="card-label">Average Expense</div><div class="amount" id="average">₹970</div></div>
+          <div><div class="card-label">Largest Expense</div><div class="amount" id="largest">₹700</div></div>
+          <div><div class="card-label">Categories Used</div><div class="amount" id="categoryCount">5</div></div>
+        </div>
+        <h2 style="margin-top:30px">Category Breakdown</h2>
+        <div id="summaryList" class="transactions"></div>
+        <p>💡 Tip: Review your spending weekly and set a budget for each category.</p>
+      </div>
+    </section>
+
+    <footer>NEONTRACK · SIMPLE · CLEAN · USEFUL<br><br>TRACK TODAY / GROW TOMORROW</footer>
+  </main>
 </div>
-</main>
 
 <script>
-const $ = id => document.getElementById(id);
-let logs = [];
+const initial = [
+  {name:"Dinner",category:"Food",amount:450,date:"2026-10-25"},
+  {name:"Bus Ticket",category:"Transport",amount:120,date:"2026-10-25"},
+  {name:"Clothes",category:"Shopping",amount:700,date:"2026-10-24"},
+  {name:"Lunch",category:"Food",amount:320,date:"2026-10-24"},
+  {name:"Electricity",category:"Bills",amount:700,date:"2026-10-23"}
+];
 
+let expenses;
 try {
-  logs = JSON.parse(localStorage.getItem("neuralLogs") || "[]");
-  if (!Array.isArray(logs)) logs = [];
+  expenses = JSON.parse(localStorage.getItem("neontrack-expenses")) || initial;
 } catch {
-  logs = [];
+  expenses = initial;
 }
 
-function updateClock(){
+const colors = ["#c84cf7","#1e9dff","#28dfae","#ffc845","#7855ff","#ff729d"];
+const money = n => "₹" + Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});
+const dateText = d => new Date(d+"T12:00:00").toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+
+document.getElementById("today").textContent =
+  new Date().toLocaleDateString("en-IN",{weekday:"short",day:"2-digit",month:"short",year:"numeric"});
+document.getElementById("dateInput").value =
+  new Date().toLocaleDateString("en-CA");
+
+function save() {
+  localStorage.setItem("neontrack-expenses",JSON.stringify(expenses));
+}
+
+function transactionHTML(e) {
+  return `<div class="transaction">
+    <div><div class="tx-name">${escapeHTML(e.name)}</div>
+    <div class="tx-detail">${escapeHTML(e.category)} · ${dateText(e.date)}</div></div>
+    <div class="tx-right"><strong>${money(e.amount)}</strong></div>
+  </div>`;
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function render() {
+  const total = expenses.reduce((s,e)=>s+Number(e.amount),0);
   const now = new Date();
-  $("clock").textContent = now.toLocaleTimeString();
-  $("date").textContent = now.toLocaleDateString(
-    undefined,{weekday:"long",year:"numeric",
-    month:"long",day:"numeric"}
-  );
-}
-setInterval(updateClock,1000);
-updateClock();
+  const monthTotal = expenses.filter(e=>{
+    const d = new Date(e.date+"T12:00:00");
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((s,e)=>s+Number(e.amount),0);
 
-function saveEntry(){
-  const title = $("title").value.trim();
-  const content = $("content").value.trim();
+  document.getElementById("total").textContent=money(total);
+  document.getElementById("monthly").textContent=money(monthTotal);
+  document.getElementById("count").textContent=expenses.length;
+  document.getElementById("chartTotal").textContent=money(total);
+  document.getElementById("average").textContent=money(expenses.length?total/expenses.length:0);
+  document.getElementById("largest").textContent=money(Math.max(0,...expenses.map(e=>e.amount)));
+  const groups={};
+  expenses.forEach(e=>groups[e.category]=(groups[e.category]||0)+Number(e.amount));
+  const entries=Object.entries(groups).sort((a,b)=>b[1]-a[1]);
+  document.getElementById("categoryCount").textContent=entries.length;
 
-  if(!title || !content){
-    $("status").textContent = "ERROR: ENTER A TITLE AND ENTRY.";
-    return;
-  }
-
-  logs.unshift({
-    id: Date.now(),
-    title,
-    content,
-    mood: $("mood").value,
-    date: new Date().toLocaleString()
+  let cumulative=0;
+  const segments=entries.map(([name,value],i)=>{
+    const start=cumulative;
+    cumulative+=total?value/total*100:0;
+    return `${colors[i%colors.length]} ${start}% ${cumulative}%`;
   });
+  document.getElementById("donut").style.background =
+    total ? `conic-gradient(${segments.join(",")})` : "#263453";
 
-  try {
-    localStorage.setItem("neuralLogs",JSON.stringify(logs));
-  } catch {
-    logs.shift();
-    $("status").textContent =
-      "Storage unavailable or full. Export your backup.";
-    return;
-  }
+  document.getElementById("legend").innerHTML=entries.map(([name,value],i)=>
+    `<div><span><i class="dot" style="background:${colors[i%colors.length]}"></i>${escapeHTML(name)}</span><b>${total?(value/total*100).toFixed(0):0}%</b></div>`
+  ).join("");
 
-  $("title").value = "";
-  $("content").value = "";
-  $("status").textContent = "ENTRY SAVED SUCCESSFULLY.";
-  renderEntries();
+  document.getElementById("recent").innerHTML =
+    [...expenses].slice(-5).reverse().map(transactionHTML).join("") || "No expenses yet";
+
+  document.getElementById("allExpenses").innerHTML =
+    [...expenses].reverse().map(transactionHTML).join("") || "No expenses yet";
+
+  document.getElementById("summaryList").innerHTML=entries.map(([name,value],i)=>
+    `<div class="transaction"><span>${escapeHTML(name)}</span><strong style="color:${colors[i%colors.length]}">${money(value)} · ${total?(value/total*100).toFixed(1):0}%</strong></div>`
+  ).join("") || "Add your first expense to see a summary.";
 }
 
-function renderEntries(){
-  const query = $("search").value.toLowerCase();
-  const filtered = logs.filter(log =>
-    (log.title+" "+log.content+" "+log.mood)
-      .toLowerCase().includes(query)
-  );
-
-  $("count").textContent = filtered.length + " ENTRIES";
-  $("entries").replaceChildren();
-
-  filtered.forEach(log => {
-    const article = document.createElement("article");
-    article.className = "entry";
-
-    const heading = document.createElement("h3");
-    heading.textContent = log.title;
-
-    const meta = document.createElement("small");
-    meta.textContent = log.date+" | "+log.mood;
-
-    const text = document.createElement("p");
-    text.style.whiteSpace = "pre-wrap";
-    text.textContent = log.content;
-
-    const del = document.createElement("button");
-    del.textContent = "DELETE";
-    del.onclick = () => {
-      if(confirm("Delete this entry?")){
-        logs = logs.filter(item => item.id !== log.id);
-        localStorage.setItem("neuralLogs",JSON.stringify(logs));
-        renderEntries();
-      }
+document.querySelectorAll("nav button").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    button.classList.add("active");
+    document.getElementById(button.dataset.view).classList.add("active");
+    const titles={
+      dashboard:["Welcome Back!","Track your expenses. Build a better tomorrow."],
+      add:["Add Expense","Record a new transaction."],
+      history:["Expense History","Every transaction, in one place."],
+      summary:["Spending Summary","Understand where your money goes."]
     };
-
-    article.append(heading,meta,text,del);
-    $("entries").append(article);
+    document.getElementById("heading").textContent=titles[button.dataset.view][0];
+    document.getElementById("subtitle").textContent=titles[button.dataset.view][1];
   });
-}
+});
 
-function exportData(){
-  const file = new Blob(
-    [JSON.stringify(logs,null,2)],
-    {type:"application/json"}
-  );
-  const url = URL.createObjectURL(file);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "neural-journal-backup.json";
-  a.click();
-  URL.revokeObjectURL(url);
-}
+document.getElementById("expenseForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  const name=document.getElementById("name").value.trim();
+  const amount=Number(document.getElementById("amountInput").value);
+  if(!name || !Number.isFinite(amount) || amount<=0) return;
+  expenses.push({
+    name,
+    category:document.getElementById("category").value,
+    amount,
+    date:document.getElementById("dateInput").value
+  });
+  save();
+  render();
+  event.target.reset();
+  document.getElementById("dateInput").value=new Date().toLocaleDateString("en-CA");
+  document.querySelector('[data-view="dashboard"]').click();
+});
 
-renderEntries();
+document.getElementById("search").addEventListener("input",event=>{
+  const q=event.target.value.toLowerCase();
+  document.getElementById("allExpenses").innerHTML=
+    [...expenses].reverse()
+      .filter(e=>(e.name+" "+e.category).toLowerCase().includes(q))
+      .map(transactionHTML).join("") || "No matching expenses";
+});
+
+render();
 </script>
 </body>
 </html>
